@@ -8,6 +8,7 @@ import emanondev.itemedit.command.ItemEditCommand;
 import emanondev.itemedit.command.SubCmd;
 import emanondev.itemedit.utility.CompleteUtility;
 import emanondev.itemedit.utility.ItemUtils;
+import emanondev.itemedit.utility.SchedulerUtils;
 import emanondev.itemedit.utility.VersionUtils;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -45,16 +46,18 @@ public class Hide extends SubCmd {
                 return;
             }
             boolean add = args.length == 3 ? Aliases.BOOLEAN.convertAlias(args[2]) : !itemMeta.hasItemFlag(flag);
-            handleFlagChange(add, flag, item, itemMeta);
+            SchedulerUtils.run(ItemEdit.get(), p, () -> {
+                handleFlagChange(add, flag, item, itemMeta);
 
-            if (add) {
-                itemMeta.addItemFlags(flag);
-            } else {
-                itemMeta.removeItemFlags(flag);
-            }
+                if (add) {
+                    itemMeta.addItemFlags(flag);
+                } else {
+                    itemMeta.removeItemFlags(flag);
+                }
 
-            item.setItemMeta(itemMeta);
-            updateView(p);
+                item.setItemMeta(itemMeta);
+                updateView(p);
+            });
         } catch (Exception e) {
             onFail(p, alias);
         }

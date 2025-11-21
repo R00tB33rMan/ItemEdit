@@ -1,10 +1,12 @@
 package emanondev.itemedit.command.itemedit;
 
+import emanondev.itemedit.ItemEdit;
 import emanondev.itemedit.aliases.Aliases;
 import emanondev.itemedit.command.ItemEditCommand;
 import emanondev.itemedit.command.SubCmd;
 import emanondev.itemedit.utility.CompleteUtility;
 import emanondev.itemedit.utility.ItemUtils;
+import emanondev.itemedit.utility.SchedulerUtils;
 import emanondev.itemedit.utility.VersionUtils;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.command.CommandSender;
@@ -80,7 +82,6 @@ public class Attribute extends SubCmd {
                 return;
             }
 
-
             String equip = null;
 
             if (args.length > 5) {
@@ -101,13 +102,16 @@ public class Attribute extends SubCmd {
                 }
             }
 
-            ItemMeta itemMeta = ItemUtils.getMeta(item);
-            //TODO here
+            String finalEquip = equip;
+            SchedulerUtils.run(ItemEdit.get(), p, () -> {
+                ItemMeta itemMeta = ItemUtils.getMeta(item);
+                //TODO here
 
 
-            itemMeta.addAttributeModifier(attr, ItemUtils.createAttributeModifier(amount, op, equip));
-            item.setItemMeta(itemMeta);
-            updateView(p);
+                itemMeta.addAttributeModifier(attr, ItemUtils.createAttributeModifier(amount, op, finalEquip));
+                item.setItemMeta(itemMeta);
+                updateView(p);
+            });
         } catch (Exception e) {
             e.printStackTrace();
             sendFailFeedbackForSub(p, alias, "add");
@@ -130,18 +134,19 @@ public class Attribute extends SubCmd {
                 return;
             }
 
-            ItemMeta itemMeta = ItemUtils.getMeta(item);
-            //TODO here
+            SchedulerUtils.run(ItemEdit.get(), p, () -> {
+                ItemMeta itemMeta = ItemUtils.getMeta(item);
+                //TODO here
 
-
-            if (attr != null) {
-                itemMeta.removeAttributeModifier(attr);
-            }
-            if (equip != null) {
-                itemMeta.removeAttributeModifier(equip);
-            }
-            item.setItemMeta(itemMeta);
-            updateView(p);
+                if (attr != null) {
+                    itemMeta.removeAttributeModifier(attr);
+                }
+                if (equip != null) {
+                    itemMeta.removeAttributeModifier(equip);
+                }
+                item.setItemMeta(itemMeta);
+                updateView(p);
+            });
         } catch (Exception e) {
             sendFailFeedbackForSub(p, alias, "remove");
         }
